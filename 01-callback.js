@@ -1,52 +1,71 @@
-// promise punya callback, jadi kita tidak usah lagi membuat callback manual
-// cara menggunakan promise adalah dengan menggunakannya sebagai return dari function, misal :
+// untuk menangani asynchronus pertama, ada namanya callback
+// callback adalah function yang di passing sebagai argument pada sebuah outer function
+// jika belum mengetahui tentang ini, mohon dipelajari dulu materi tentang Higher Order Function
 
-function promise(isOffline){
-    return new Promise((resolve, reject) => {
-        if(isOffline) reject("Gagal mengambil data, kamu offline");
-        const data = [100, 200, 300];
-        resolve(data);
-    });
+// misal kita ambil data dari internet, variabel yang ada misal adalah callback dan juga sinyal :
+function getData(isOffline, callback){
+    if(isOffline) console.log("Kamu offline");
+    else {
+        setTimeout(() => {
+            console.log("Data : ");
+            const data = ["satu.png", "dua.png", "tiga.png"];
+            callback(data);
+        }, 4000);
+        console.log("Sedang mengambil data...");
+        setTimeout(() => console.log("1"), 1000);
+        setTimeout(() => console.log("2"), 2000);
+        setTimeout(() => console.log("3"), 3000);
+    }
 }
 
-promise(false);
+function display(data){
+    console.log(data);
+}
 
-// kenapa tidak berjalan ? sebenarnya fungsi tersebut berjalan tapi datanya belum di ambil
-// alasannya karena data dalam promise memiliki 3 state yaitu :
-// 1. pending : saat dipanggil
-// 2. reject : saat error
-// 3. resolve : saat berhasil
+getData(false, display);
+getData(true, display);
 
-// untuk mengammbil resolve kita menggunakan .then, dan reject dengan .catch
-// contoh :
+// karena saat mengambil data dari internet berkemungkinan error, makanya pakai parameter is offline
 
-promise(false)
-    .then(result => console.log(result))
-    .catch(err => console.log("Error : ", err.name));
+
+// kelihatannya sudah bagus kan ? tapi bagaiimana jika data yang kita ambil banyak ?
+// misal kita menggunakan callbacknya secara langsung tanpa membuatnya di luar, seperti :
+
+function getDataPyramidDoom(isOffline, callback){
+    if(isOffline) console.log("Kamu offline");
+    else {
+        setTimeout(() => {
+            const data = ["doom_satu.png", "doom_dua.png", "doom_tiga.png"];
+            callback(data);
+        }, 4000);
+        console.log("Sedang mengambil data...");
+    }
+}
+
+getDataPyramidDoom(false, (data) => {
+    console.log("Data_doom 1 : ");
+    console.log(data);
+    getDataPyramidDoom(false, (data) => {
+        console.log("Data_doom 2 : ");
+        console.log(data);
+        getDataPyramidDoom(false, (data) => {
+            console.log("Data_doom 3 : ");
+            console.log(data);
+            getDataPyramidDoom(false, (data) => {
+                console.log("Data_doom 4 : ");
+                console.log(data);
+                getDataPyramidDoom(false, (data) => {
+                    console.log("Data_doom 5 : ");
+                    console.log(data);
+                });        
+            });
     
-promise(true)
-    .then(result => console.log(result))
-    .catch(err => console.log("Error : ", err));
-    
-// misal kita mengambil banyak data, maka akan seperti ini :
-console.log("\nDoom : \n\n");
-promise(false)
-    .then(result => {
-        console.log(result);
-        promise(false)
-        .then(result => {
-            console.log(result);
-            promise(false)
-                .then(result => {
-                    console.log(result);
-                })
-                .catch(err => console.log("Error : ", err.name));
-        })
-        .catch(err => console.log("Error : ", err.name));
-    })
-    .catch(err => console.log("Error : ", err.name));
+        });
+        
+    });
+});
 
 
-// katanya untuk menanggulangi callback, tapi masih mirip callback
-// iya, bisa seperti itu, tetapi promise punya kelebihan yaitu fungsinya bisa dilakukan chaining
-// chaining akan di jelaskna dimateri selanjutnya
+
+// ini dinamakan callback hell, sangat pusing melihat syntax seperti ini, karena itu ks ES8 memperkenalkan Promise
+// untuk mencegah callback hell
